@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pro.Поиск</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* Общие стили */
+        body {
+            font-family: 'Roboto', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #f0f4f8;
+            color: #333;
+        }
+
+        /* Шапка сайта */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .logo {
+            font-size: 1.5em;
+            font-weight: 700;
+            color: #4285f4;
+            margin-left: 20px;
+        }
+
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: #ccc;
+            margin-right: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-weight: bold;
+        }
+
+        /* Поисковая строка */
+        .search-container {
+            display: flex;
+            align-items: center;
+            margin-top: 50px;
+        }
+
+        .search-bar {
+            width: 600px;
+            padding: 14px 20px;
+            border: none;
+            border-radius: 30px;
+            font-size: 16px;
+            outline: none;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            transition: box-shadow 0.3s ease;
+        }
+
+        .search-bar:focus {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .search-button {
+            background-color: #4285f4;
+            color: white;
+            border: none;
+            border-radius: 30px;
+            padding: 14px 30px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-left: 10px;
+            transition: background-color 0.3s ease;
+        }
+
+        .search-button:hover {
+            background-color: #357ae8;
+        }
+
+        /* Результаты поиска */
+        #search-results {
+            width: 80%;
+            margin-top: 30px;
+            text-align: left;
+        }
+
+        .result-item {
+            margin-bottom: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            background-color: #fff;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .result-title {
+            font-size: 1.2em;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .result-link {
+            color: #1a73e8;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .result-link:hover {
+            text-decoration: underline;
+            color: #3367d6;
+        }
+
+        .result-snippet {
+            color: #444;
+            font-size: 0.9em;
+            line-height: 1.4;
+        }
+
+        /* Подвал */
+        .footer {
+            margin-top: auto;
+            width: 100%;
+            background-color: #fff;
+            padding: 20px;
+            text-align: center;
+            font-size: 0.85em;
+            color: #777;
+            border-top: 1px solid #eee;
+        }
+
+        /* Стили для Википедии */
+        #wikipedia-result {
+            width: 80%;
+            margin-top: 30px;
+            padding: 15px;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+            text-align: left;
+            font-size: 1em;
+            color: #333;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        #wikipedia-result h2 {
+            margin-top: 0;
+            font-size: 1.5em;
+            font-weight: bold;
+        }
+
+        #wikipedia-result a {
+            color: #1a73e8;
+            text-decoration: none;
+        }
+
+        #wikipedia-result a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+    <header class="header">
+        <div class="logo">Pro.Поиск</div>
+        <div class="avatar"></div>
+    </header>
+
+    <div class="search-container">
+        <input type="text" id="search-input" class="search-bar" placeholder="Что хотите найти?">
+        <button id="search-button" class="search-button">Поиск</button>
+    </div>
+
+    <div id="wikipedia-result">
+        <!-- Результат из Википедии будет отображаться здесь -->
+    </div>
+
+    <div id="search-results">
+        <!-- Результаты поиска будут отображаться здесь -->
+    </div>
+
+    <footer class="footer">
+        Сделано с любовью для компании Oink Tech Ltd Co © 2025- н.в
+    </footer>
+
+    <script>
+        const searchInput = document.getElementById('search-input');
+        const searchButton = document.getElementById('search-button');
+        const searchResults = document.getElementById('search-results');
+        const wikipediaResultDiv = document.getElementById('wikipedia-result');
+
+        const CSE_ID = 'f037a62d8533a420b'; // Замените на свой ID CSE
+        const WIKIPEDIA_API_ENDPOINT = 'https://neolurk.org/w/api.php?action=query&format=json&origin=*&prop=extracts&exintro&explaintext&redirects=1&titles='; // API endpoint для русской Википедии
+
+        searchButton.addEventListener('click', performSearch);
+
+        searchInput.addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                performSearch();
+            }
+        });
+
+        async function performSearch() {
+            const query = searchInput.value;
+            if (query) {
+                searchResults.innerHTML = '';
+                wikipediaResultDiv.innerHTML = 'Загрузка...';
+                await getWikipediaSummary(query);
+                searchGoogle(query);
+            }
+        }
+
+        function searchGoogle(query) {
+            const script = document.createElement('script');
+            script.src = `https://www.googleapis.com/customsearch/v1?key=AIzaSyA_VFfEHQ8iQQMuyMya5dbX3oGRLimbE1I&cx=${CSE_ID}&q=${query}&callback=displayResults`; // Замените YOUR_GOOGLE_API_KEY
+            document.body.appendChild(script);
+        }
+
+        window.displayResults = function(data) {
+            searchResults.innerHTML = '';
+
+            if (data && data.items) {
+                data.items.forEach(item => {
+                    const resultItem = document.createElement('div');
+                    resultItem.classList.add('result-item');
+
+                    const resultTitle = document.createElement('div');
+                    resultTitle.classList.add('result-title');
+                    const resultLink = document.createElement('a');
+                    resultLink.href = item.link;
+                    resultLink.textContent = item.title;
+                    resultLink.classList.add('result-link');
+                    resultTitle.appendChild(resultLink);
+
+                    const resultSnippet = document.createElement('div');
+                    resultSnippet.classList.add('result-snippet');
+                    resultSnippet.textContent = item.snippet;
+
+                    resultItem.appendChild(resultTitle);
+                    resultItem.appendChild(resultSnippet);
+
+                    searchResults.appendChild(resultItem);
+                });
+            } else {
+                searchResults.textContent = 'Ничего не найдено. Попробуйте позже';
+            }
+        }
+
+        async function getWikipediaSummary(query) {
+            try {
+                const response = await fetch(WIKIPEDIA_API_ENDPOINT + encodeURIComponent(query));
+                const data = await response.json();
+
+                const pages = data.query.pages;
+                const pageId = Object.keys(pages)[0]; // Получаем ID первой страницы
+
+                if (pageId !== '-1' && pages[pageId].extract) {
+                    const extract = pages[pageId].extract;
+                    const title = pages[pageId].title;
+                    const wikipediaUrl = `https://neolurk.org/wiki/${encodeURIComponent(title)}`; // URL статьи
+
+                    let wikipediaContent = `<h2><a href="${wikipediaUrl}" target="_blank">${title}</a></h2>`;
+                    wikipediaContent += `<p>${extract}</p>`;
+                    wikipediaResultDiv.innerHTML = wikipediaContent;
+                } else {
+                    wikipediaResultDiv.textContent = 'Статья об компании и человеке не найдена.';
+                }
+            } catch (error) {
+                console.error('Ошибка', error);
+                wikipediaResultDiv.textContent = 'Произошла ошибка при получении данных';
+            }
+        }
+    </script>
+
+</body>
+</html>
